@@ -14,19 +14,19 @@ This project deploys a secure and scalable Kubernetes cluster. Here is the visua
 
 ```mermaid
 graph TD
-    subgraph AWS Cloud [AWS Cloud (ap-southeast-1)]
-        subgraph VPC [VPC (172.31.0.0/16)]
+    subgraph AWS_Cloud ["AWS Cloud (ap-southeast-1)"]
+        subgraph VPC ["VPC (172.31.0.0/16)"]
             IGW[Internet Gateway]
             
-            subgraph Public Subnets [Public Subnets (Across 3 AZs)]
+            subgraph Public_Subnets ["Public Subnets (Across 3 AZs)"]
                 LB[Network Load Balancer]
                 NAT[NAT Gateway (Optional)]
                 
-                subgraph Control Plane [Control Plane ASG]
+                subgraph Control_Plane ["Control Plane ASG"]
                     CP1[Talos Control Plane Node]
                 end
                 
-                subgraph Worker Nodes [Worker ASG]
+                subgraph Worker_Nodes ["Worker ASG"]
                     W1[Talos Worker Node 1]
                     W2[Talos Worker Node 2]
                 end
@@ -39,13 +39,13 @@ graph TD
         end
     end
 
-    subgraph User Access
+    subgraph User_Access ["User Access"]
         User[You / Developer]
         Kubectl[kubectl / k9s]
         Browser[Web Browser]
     end
 
-    User -->|terraform apply| AWS Cloud
+    User -->|terraform apply| AWS_Cloud
     Kubectl -->|kubeconfig| LB
     Browser -->|HTTPS| LB
 ```
