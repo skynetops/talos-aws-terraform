@@ -96,7 +96,7 @@ jobs:
     needs: terraform-plan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: dev # Manual Approval required here
+    # environment: dev # Removed for Auto-Apply
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -129,7 +129,7 @@ jobs:
     needs: terraform-apply-dev
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: staging # Manual Approval required here
+    # environment: staging # Removed for Auto-Apply
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
