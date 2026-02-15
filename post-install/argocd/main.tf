@@ -10,18 +10,19 @@ resource "helm_release" "argocd" {
   chart      = "argo-cd"
   version    = var.argocd_version
   namespace  = kubernetes_namespace.argocd.metadata[0].name
+  
+  timeout          = 600  # 10 minutes
+  wait             = true
+  wait_for_jobs    = true
+  create_namespace = false
+  
+  atomic           = false  # Don't rollback on failure
+  cleanup_on_fail  = false  # Keep resources for debugging
 
   values = [
     yamlencode({
       global = {
-        tolerations = [
-          {
-            key      = "node.cloudprovider.kubernetes.io/uninitialized"
-            operator = "Equal"
-            value    = "true"
-            effect   = "NoSchedule"
-          }
-        ]
+        # Remove problematic tolerations - let pods schedule normally
       }
       server = {
         extraArgs = [
@@ -30,6 +31,43 @@ resource "helm_release" "argocd" {
         service = {
           type = "LoadBalancer"
         }
+        resources = {
+          limits = {
+            cpu    = "500m"
+            memory = "512Mi"
+          }
+          requests = {
+            cpu    = "250m"
+            memory = "256Mi"
+          }
+        }
+      }
+      controller = {
+        resources = {
+          limits = {
+            cpu    = "1000m"
+            memory = "1Gi"
+          }
+          requests = {
+            cpu    = "500m"
+            memory = "512Mi"
+          }
+        }
+      }
+      repoServer = {
+        resources = {
+          limits = {
+            cpu    = "500m"
+            memory = "512Mi"
+          }
+          requests = {
+            cpu    = "250m"
+            memory = "256Mi"
+          }
+        }
+      }
+      dex = {
+        enabled = false  # Disable Dex if not needed
       }
       configs = {
         secret = {

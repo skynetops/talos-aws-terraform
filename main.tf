@@ -1,19 +1,10 @@
 resource "null_resource" "prechecks" {
   lifecycle {
-    precondition {
-      condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.git_url == "")
-      error_message = "If Argo CD post install is enabled, you must provide a git url to bootstrap Argo CD"
-    }
-
-    precondition {
-      condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.git_branch == "")
-      error_message = "If Argo CD post install is enabled, you must provide a git branch to bootstrap Argo CD"
-    }
-
-    precondition {
-      condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.ssh_key == "")
-      error_message = "If Argo CD post install is enabled, you must provide a git ssh key to bootstrap Argo CD"
-    }
+    # Git URL and SSH key are optional - only required if you want GitOps bootstrap
+    # precondition {
+    #   condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.git_url != "" && var.post_install.argocd.ssh_key == "")
+    #   error_message = "If Argo CD git_url is provided, you must also provide an ssh_key"
+    # }
 
     precondition {
       condition     = !(!var.post_install.argocd.enabled && (var.post_install.extras.ebs || var.post_install.extras.autoscaler || var.post_install.extras.linkerd))
