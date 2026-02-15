@@ -1,23 +1,23 @@
 resource "null_resource" "prechecks" {
   lifecycle {
     precondition {
-      condition     = !(var.post_install.flux.enabled && var.post_install.flux.git_url == "")
-      error_message = "If Flux post install is enabled, you must provide a git url to bootstrap flux"
+      condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.git_url == "")
+      error_message = "If Argo CD post install is enabled, you must provide a git url to bootstrap Argo CD"
     }
 
     precondition {
-      condition     = !(var.post_install.flux.enabled && var.post_install.flux.git_branch == "")
-      error_message = "If Flux post install is enabled, you must provide a git branch to bootstrap flux"
+      condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.git_branch == "")
+      error_message = "If Argo CD post install is enabled, you must provide a git branch to bootstrap Argo CD"
     }
 
     precondition {
-      condition     = !(var.post_install.flux.enabled && var.post_install.flux.ssh_key == "")
-      error_message = "If Flux post install is enabled, you must provide a git ssh key to bootstrap flux"
+      condition     = !(var.post_install.argocd.enabled && var.post_install.argocd.ssh_key == "")
+      error_message = "If Argo CD post install is enabled, you must provide a git ssh key to bootstrap Argo CD"
     }
 
     precondition {
-      condition     = !(!var.post_install.flux.enabled && (var.post_install.extras.ebs || var.post_install.extras.autoscaler || var.post_install.extras.linkerd))
-      error_message = "Post Install extras are enabled but Flux post install is not. The extras as designed with Flux. Enabled Flux post install if you want to use them."
+      condition     = !(!var.post_install.argocd.enabled && (var.post_install.extras.ebs || var.post_install.extras.autoscaler || var.post_install.extras.linkerd))
+      error_message = "Post Install extras are enabled but Argo CD post install is not. The extras are designed with Argo CD. Enable Argo CD post install if you want to use them."
     }
   }
 }
@@ -100,14 +100,11 @@ module "post_install" {
     time_sleep.wait_for_cluster_ready
   ]
 
-  providers = {
-    flux = flux
-  }
-
   project_name = var.project_name
   region       = var.region
 
   cilium_version   = var.cilium_version
+  argocd_version   = var.argocd_version
   k8s_service_host = module.networking.load_balancer_dns
 
   enables = var.post_install
