@@ -239,6 +239,27 @@ terraform apply
 
 After completion, you'll have `kubeconfig` and `talosconfig` files in your directory.
 
+### 4. Access Cluster
+
+To access your cluster with `kubectl` or `k9s`:
+
+**Option 1: Permanent (Recommended)**
+```bash
+# Copy kubeconfig to default location
+mkdir -p ~/.kube
+cp ./kubeconfig ~/.kube/config
+```
+
+**Option 2: Temporary (Current Session)**
+```bash
+export KUBECONFIG=$(pwd)/kubeconfig
+```
+
+**Verify Connection:**
+```bash
+kubectl get nodes
+```
+
 ## Modules
 
 * Cloud Infra - Creates the cloud infastructure required for the cluster
