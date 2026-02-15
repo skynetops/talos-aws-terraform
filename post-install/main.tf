@@ -4,12 +4,19 @@ module "cilium" {
   k8s_service_host = var.k8s_service_host
 }
 
+module "ccm" {
+  source       = "./ccm"
+  project_name = var.project_name
+
+  depends_on = [module.cilium]
+}
+
 module "argocd" {
   count = var.enables.argocd.enabled ? 1 : 0
 
   source = "./argocd"
 
-  depends_on = [module.cilium]
+  depends_on = [module.cilium, module.ccm]
 
   argocd_version      = var.argocd_version
   git_url             = var.enables.argocd.git_url
