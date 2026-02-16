@@ -23,6 +23,8 @@ module "argocd" {
   git_branch          = var.enables.argocd.git_branch
   git_path            = var.enables.argocd.git_path
   git_ssh_key         = var.enables.argocd.ssh_key
+  oauth_client_id     = var.argocd_oidc_client_id
+  oauth_client_secret = var.argocd_oidc_client_secret
   admin_password_hash = var.enables.argocd.admin_password_hash
 }
 

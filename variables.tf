@@ -113,3 +113,18 @@ variable "post_install" {
   }
   description = "Post-installation configuration for Argo CD and extras"
 }
+
+# OIDC credentials for Argo CD (pass via secrets.auto.tfvars, do not commit)
+variable "argocd_oidc_client_id" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "GitHub OAuth Client ID for Argo CD OIDC"
+}
+
+variable "argocd_oidc_client_secret" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "GitHub OAuth Client Secret for Argo CD OIDC"
+}

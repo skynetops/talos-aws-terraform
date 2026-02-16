@@ -29,6 +29,34 @@ variable "git_ssh_key" {
   default     = ""
 }
 
+variable "git_username" {
+  type        = string
+  description = "Git username for basic auth (use with personal access token)"
+  sensitive   = true
+  default     = ""
+}
+
+variable "git_password" {
+  type        = string
+  description = "Git password or personal access token for basic auth"
+  sensitive   = true
+  default     = ""
+}
+
+variable "oauth_client_id" {
+  type        = string
+  description = "GitHub OAuth Client ID for Argo CD OIDC"
+  sensitive   = true
+  default     = ""
+}
+
+variable "oauth_client_secret" {
+  type        = string
+  description = "GitHub OAuth Client Secret for Argo CD OIDC"
+  sensitive   = true
+  default     = ""
+}
+
 variable "admin_password_hash" {
   type        = string
   description = "Bcrypt hash of the admin password. Generate with: htpasswd -nbBC 10 '' mypassword | tr -d ':\\n' | sed 's/$2y/$2a/'"
