@@ -41,7 +41,7 @@ graph TD
     %% Styling
     style CP fill:#f96,stroke:#333,stroke-width:2px
     style NAT fill:#fff,stroke:#333,stroke-dasharray: 5 5
-
+´´´
 ### Key Components Explained:
 
 1.  **VPC (Virtual Private Cloud):** Your own private network in the AWS cloud. It's like your house's fence.
