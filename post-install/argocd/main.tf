@@ -76,26 +76,26 @@ resource "helm_release" "argocd" {
         }
       }
       dex = {
-        enabled = false  # Disable Dex if not needed
+        enabled = true
       }
       configs = {
         cm = {
-          url = "https://argocd.skynetdevops.com"
+          url = "https://${var.k8s_service_host}"
           "oidc.config" = <<-EOT
             name: GitHub
             issuer: https://github.com
-            clientID: ${var.oauth_client_id}
+            clientID: ${var.argocd_oidc_client_id}
             clientSecret: $oidc.clientSecret
             requestedScopes:
             - openid
             - profile
             - email
-            redirectURI: https://argocd.skynetdevops.com/api/dex/callback
+            redirectURI: https://${var.k8s_service_host}/api/dex/callback
           EOT
         }
         secret = {
           argocdServerAdminPassword = var.admin_password_hash
-          "oidc.clientSecret"       = var.oauth_client_secret
+          "oidc.clientSecret"       = var.argocd_oidc_client_secret
         }
         params = {
           "server.insecure" = "false"
