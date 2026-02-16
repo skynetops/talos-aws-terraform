@@ -10,45 +10,37 @@ Terraform code for creating a production-ready Kubernetes cluster in AWS using [
 
 ## 🗺️ Infrastructure Topology
 
-This project deploys a secure and scalable Kubernetes cluster. Here is the visual map of what you are building:
+## Visual Infrastructure Map
+
+This project deploys a secure and scalable Kubernetes cluster using Talos Linux on AWS. Here is the visual map of what you are building:
 
 ```mermaid
 graph TD
-    subgraph AWS_Cloud ["AWS Cloud (ap-southeast-1)"]
-        subgraph VPC ["VPC (172.31.0.0/16)"]
-            IGW[Internet Gateway]
-            
-            subgraph Public_Subnets ["Public Subnets (Across 3 AZs)"]
-                LB[Network Load Balancer]
-                NAT[NAT Gateway (Optional)]
-                
-                subgraph Control_Plane ["Control Plane ASG"]
-                    CP1[Talos Control Plane Node]
-                end
-                
-                subgraph Worker_Nodes ["Worker ASG"]
-                    W1[Talos Worker Node 1]
-                    W2[Talos Worker Node 2]
-                end
-            end
-            
-            IGW --> LB
-            LB -->|Port 6443| CP1
-            CP1 -.->|Internal Communication| W1
-            CP1 -.->|Internal Communication| W2
-        end
+    %% Define Nodes
+    Users((Users))
+    LB[AWS Network Load Balancer]
+    
+    subgraph Public_Subnet [Public Subnet]
+        NAT["NAT Gateway (Optional)"]
     end
 
-    subgraph User_Access ["User Access"]
-        User[You / Developer]
-        Kubectl[kubectl / k9s]
-        Browser[Web Browser]
+    subgraph Private_Subnet [Private Subnet]
+        CP["Talos Control Plane (EC2)"]
+        W1["Worker Node 1 (EC2)"]
+        W2["Worker Node 2 (EC2)"]
     end
 
-    User -->|terraform apply| AWS_Cloud
-    Kubectl -->|kubeconfig| LB
-    Browser -->|HTTPS| LB
-```
+    %% Define Connections
+    Users --> LB
+    LB --> CP
+    CP --- W1
+    CP --- W2
+    W1 & W2 --> NAT
+    NAT --> Internet((Internet))
+
+    %% Styling
+    style CP fill:#f96,stroke:#333,stroke-width:2px
+    style NAT fill:#fff,stroke:#333,stroke-dasharray: 5 5
 
 ### Key Components Explained:
 
