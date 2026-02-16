@@ -80,7 +80,7 @@ resource "helm_release" "argocd" {
       }
       configs = {
         cm = {
-          url = "https://a7b567d9c6311466b8b1af98f67cb612-1663751650.ap-southeast-1.elb.amazonaws.com"
+          url = "http://a7b567d9c6311466b8b1af98f67cb612-1663751650.ap-southeast-1.elb.amazonaws.com"
           "dex.config" = <<-EOT
             connectors:
             - type: github
