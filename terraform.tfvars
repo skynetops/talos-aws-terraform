@@ -25,6 +25,8 @@ post_install = {
     git_branch          = "main"
     git_path            = "bootstrap/app-of-apps"
     ssh_key             = ""
+    username            = ""
+    password            = ""
     admin_password_hash = ""
   }
   extras = {
