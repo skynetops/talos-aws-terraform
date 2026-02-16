@@ -1,18 +1,13 @@
-# Talos Linux AWS Kubernetes Terraform
 
-Terraform code for creating a production-ready Kubernetes cluster in AWS using [Talos Linux](https://talos.dev).
+# Talos Linux AWS Kubernetes via Terraform
 
-[![Terraform](https://img.shields.io/badge/Terraform-1.x-blue.svg)](https://www.terraform.io/)
-[![Talos](https://img.shields.io/badge/Talos-v1.7.6-orange.svg)](https://talos.dev/)
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.30.5-blue.svg)](https://kubernetes.io/)
+This repository contains Terraform code for deploying a production-ready, API-managed Kubernetes cluster on AWS using [Talos Linux](https://talos.dev).
 
 ---
 
 ## 🗺️ Infrastructure Topology
 
-## Visual Infrastructure Map
-
-This project deploys a secure and scalable Kubernetes cluster using Talos Linux on AWS. Here is the visual map of what you are building:
+The following diagram illustrates the secure network layout. The Control Plane and Workers stay tucked away in private subnets, while traffic is managed via an AWS Network Load Balancer (NLB).
 
 ```mermaid
 graph TD
@@ -41,128 +36,120 @@ graph TD
     %% Styling
     style CP fill:#f96,stroke:#333,stroke-width:2px
     style NAT fill:#fff,stroke:#333,stroke-dasharray: 5 5
-´´´
+
+```
+
 ### Key Components Explained:
 
-1.  **VPC (Virtual Private Cloud):** Your own private network in the AWS cloud. It's like your house's fence.
-2.  **Control Plane:** The "Brain" of Kubernetes. It manages the cluster, schedules applications, and stores the state.
-3.  **Worker Nodes:** The "Muscle". This is where your actual applications (like websites, APIs) run.
-4.  **Load Balancer:** The "Receptionist". It accepts traffic from the internet (you) and directs it to the right place inside the cluster.
-5.  **Talos Linux:** A special, very secure operating system built *only* for Kubernetes. It has no SSH, no console, and is immutable (cannot be changed once started).
+* **VPC (Virtual Private Cloud):** Your isolated network "fence" in AWS.
+* **Control Plane:** The "Brain" of Kubernetes. Manages scheduling and cluster state.
+* **Worker Nodes:** The "Muscle." This is where your actual application pods live.
+* **Load Balancer:** The "Receptionist." It routes external user traffic into the cluster.
+* **Talos Linux:** A security-focused, immutable operating system. **No SSH, no shell, no fluff.** It is managed entirely via an API.
 
 ---
 
 ## 🚀 Quick Start Guide
 
-Follow these steps to get your cluster running in minutes.
+### 1. Prerequisites
 
-### 1. Prerequisites (What you need installed)
+Ensure you have the following tools installed:
 
-*   **Terraform:** The tool that builds the cloud infrastructure. [Download here](https://www.terraform.io/downloads).
-*   **AWS CLI:** Command line tool to talk to AWS. [Download here](https://aws.amazon.com/cli/).
-*   **kubectl:** The remote control for Kubernetes. [Download here](https://kubernetes.io/docs/tasks/tools/).
+* [Terraform](https://www.terraform.io/downloads) (v1.0+)
+* [AWS CLI](https://aws.amazon.com/cli/) (Configured with valid credentials)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/)
+* [talosctl](https://www.talos.dev/v1.7/introduction/getting-started/) (Required for cluster management)
 
 ### 2. Configure Your Cluster
 
-Create a file named `terraform.tfvars` in this folder. Copy and paste this configuration:
+Create a `terraform.tfvars` file to define your environment:
 
 ```hcl
-region       = "ap-southeast-1"  # Or your preferred AWS region
-project_name = "talos-cluster"
+region          = "ap-southeast-1"
+project_name    = "talos-cluster"
 
-# Cluster Size
+# Cluster Sizing
 control_plane_nodes = 1
 worker_nodes_min    = 2
-worker_nodes_max    = 3
+worker_nodes_max    = 5
 
-# Instance Types (t3.small is cheapest for testing)
+# Instance Selection
 control_plane_node_instance_type = "t3.small"
 worker_node_instance_type        = "t3.small"
 
-# Access (Open to world for learning, restrict IPs in production!)
+# Access Control (Restrict these in production!)
 talos_api_allowed_cidr      = "0.0.0.0/0"
 kubernetes_api_allowed_cidr = "0.0.0.0/0"
 
 # Features
 post_install = {
   argocd = {
-    enabled = true  # Installs the GitOps dashboard
+    enabled = true
   }
 }
+
 ```
 
-### 3. Deploy (Build it!)
-
-Run these commands in your terminal:
+### 3. Deploy
 
 ```bash
-# 1. Initialize Terraform (Downloads plugins)
 terraform init
-
-# 2. Preview changes
 terraform plan
+terraform apply -auto-approve
 
-# 3. Apply changes (Type 'yes' when asked)
-terraform apply
 ```
 
-☕ **Wait about 5-10 minutes.** Terraform is building your cloud servers.
+*Deployment typically takes 5-10 minutes.*
 
-### 4. Connect to Your Cluster
+### 4. Connect
 
-Once Terraform finishes, you will see a `kubeconfig` file in your folder.
+Terraform will generate a `kubeconfig` and `talosconfig` in your local directory.
 
-**To use `kubectl` permanently:**
 ```bash
-mkdir -p ~/.kube
-cp ./kubeconfig ~/.kube/config
-```
+# Setup kubectl access
+export KUBECONFIG=$(pwd)/kubeconfig
 
-**Verify it works:**
-```bash
+# Verify nodes are Ready
 kubectl get nodes
+
 ```
-*You should see 3 nodes listed as `Ready`.*
 
 ---
 
-## 🐙 Accessing ArgoCD (The Dashboard)
+## 🐙 Accessing ArgoCD (GitOps)
 
-ArgoCD is a tool that automatically deploys your applications from Git. We installed it for you!
+If enabled, ArgoCD is deployed automatically.
 
-### 1. Get the Login Password
-Run this command to reveal the admin password:
+1. **Retrieve Admin Password:**
 ```bash
 kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d && echo
+
 ```
 
-### 2. Find the Website URL
-Run this to see the external address:
+
+2. **Get Load Balancer URL:**
 ```bash
-kubectl get svc -n argocd argocd-server
-```
-Look for the **EXTERNAL-IP** (it will look like `xxx.ap-southeast-1.elb.amazonaws.com`).
+kubectl get svc -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 
-### 3. Login
-1.  Open that URL in your browser (e.g., `https://xxx.elb.amazonaws.com`).
-2.  **Ignore the security warning** (it's safe, we just used a self-signed certificate).
-3.  **Username:** `admin`
-4.  **Password:** (The one you got in Step 1).
+```
+
+
+3. **Login:** Use `admin` and the password from step 1 at the URL provided.
 
 ---
 
-## 🛠️ Troubleshooting & Maintenance
+## 🛠️ Maintenance & Cleanup
 
-**System Status:**
-- Check all pods: `kubectl get pods -A`
-- Check nodes: `kubectl get nodes -o wide`
-
-**Destroying the Cluster (To stop costs):**
-When you are done, run this to delete everything:
-```bash
-terraform destroy
-```
+| Task | Command |
+| --- | --- |
+| **Check Cluster Health** | `talosctl health --talosconfig talosconfig` |
+| **View All Pods** | `kubectl get pods -A` |
+| **Destroy Infrastructure** | `terraform destroy` |
 
 ---
 
-*Built with ❤️ for simple, scalable Kubernetes on AWS.*
+*Built with ❤️ for simple, scalable, and secure Kubernetes.*
+
+---
+
+**Would you like me to add a "Known Issues" or "Cost Estimation" section to help users avoid unexpected AWS bills?**
