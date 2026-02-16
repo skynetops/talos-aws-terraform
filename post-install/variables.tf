@@ -18,6 +18,18 @@ variable "argocd_version" {
   type = string
 }
 
+variable "argocd_oidc_client_id" {
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "argocd_oidc_client_secret" {
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "enables" {
   type = object({
     argocd = object({
@@ -26,6 +38,8 @@ variable "enables" {
       git_branch          = string
       git_path            = string
       ssh_key             = string
+      username            = string
+      password            = string
       admin_password_hash = string
     })
     extras = object({
@@ -42,6 +56,8 @@ variable "enables" {
       git_path            = "bootstrap"
       ssh_key             = ""
       admin_password_hash = ""
+      username            = ""
+      password            = ""
     }
     extras = {
       ebs        = false
