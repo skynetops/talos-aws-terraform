@@ -79,11 +79,13 @@ variable "argocd_version" {
 variable "post_install" {
   type = object({
     argocd = object({
-      enabled            = bool
-      git_url            = string
-      git_branch         = string
-      git_path           = string
-      ssh_key            = string
+      enabled             = bool
+      git_url             = string
+      git_branch          = string
+      git_path            = string
+      ssh_key             = string
+      username            = string
+      password            = string
       admin_password_hash = string
     })
     extras = object({
@@ -99,6 +101,8 @@ variable "post_install" {
       git_branch          = "main"
       git_path            = "bootstrap"
       ssh_key             = ""
+      username            = ""
+      password            = ""
       admin_password_hash = ""
     }
     extras = {
