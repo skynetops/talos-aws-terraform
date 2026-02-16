@@ -36,6 +36,9 @@ resource "helm_release" "argocd" {
             http  = 8080
             https = 8080
           }
+          annotations = {
+            "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internal"
+          }
         }
         resources = {
           limits = {
@@ -103,6 +106,28 @@ resource "kubernetes_secret" "git_repo" {
     type          = "git"
     url           = var.git_url
     sshPrivateKey = var.git_ssh_key
+  }
+
+  depends_on = [helm_release.argocd]
+}
+
+# Create Git repository secret using basic auth (username + PAT)
+resource "kubernetes_secret" "git_repo_basic" {
+  count = var.git_username != "" && var.git_password != "" ? 1 : 0
+
+  metadata {
+    name      = "git-repo-credentials-basic"
+    namespace = kubernetes_namespace.argocd.metadata[0].name
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repository"
+    }
+  }
+
+  data = {
+    type     = "git"
+    url      = var.git_url
+    username = var.git_username
+    password = var.git_password
   }
 
   depends_on = [helm_release.argocd]
