@@ -25,11 +25,17 @@ resource "helm_release" "argocd" {
         # Remove problematic tolerations - let pods schedule normally
       }
       server = {
-        extraArgs = [
-          "--insecure" # For internal access; remove for production with proper TLS
-        ]
+        extraArgs = []
         service = {
           type = "LoadBalancer"
+          ports = {
+            http  = 80
+            https = 443
+          }
+          targetPort = {
+            http  = 8080
+            https = 8080
+          }
         }
         resources = {
           limits = {
@@ -72,6 +78,9 @@ resource "helm_release" "argocd" {
       configs = {
         secret = {
           argocdServerAdminPassword = var.admin_password_hash
+        }
+        params = {
+          "server.insecure" = "false"
         }
       }
     })
