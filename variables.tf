@@ -128,3 +128,11 @@ variable "argocd_oidc_client_secret" {
   default     = ""
   description = "GitHub OAuth Client Secret for Argo CD OIDC"
 }
+
+# Optional: provide a base64-encoded KMS ciphertext instead of plaintext secret
+variable "argocd_oidc_client_secret_kms_ciphertext" {
+  type        = string
+  sensitive   = true
+  default     = ""
+  description = "Base64 KMS-encrypted payload for the GitHub OAuth client secret (aws kms encrypt output). If set, it will be decrypted via aws_kms_secrets and used instead of argocd_oidc_client_secret."
+}
