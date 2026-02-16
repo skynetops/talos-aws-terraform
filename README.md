@@ -15,7 +15,6 @@ This repository provides the Infrastructure as Code (IaC) to deploy a security-h
 The deployment utilizes a **Multi-Tier Network Architecture** to isolate the Control Plane and Data Plane while providing secure ingress for management and application traffic.
 
 ```mermaid
-
 graph TD
     subgraph AWS_Cloud ["AWS Cloud (ap-southeast-1)"]
         subgraph VPC ["VPC: 10.0.0.0/16"]
