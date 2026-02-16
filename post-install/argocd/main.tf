@@ -80,7 +80,7 @@ resource "helm_release" "argocd" {
       }
       configs = {
         cm = {
-          url = "http://a7b567d9c6311466b8b1af98f67cb612-1663751650.ap-southeast-1.elb.amazonaws.com"
+          url = "https://a7b567d9c6311466b8b1af98f67cb612-1663751650.ap-southeast-1.elb.amazonaws.com"
           "oidc.tls.insecureSkipVerify" = "true"
           "dex.config" = <<-EOT
             connectors:
@@ -99,7 +99,7 @@ resource "helm_release" "argocd" {
           "github.clientSecret"     = var.oauth_client_secret
         }
         params = {
-          "server.insecure" = "true"
+          "server.insecure" = "false"
         }
       }
     })
