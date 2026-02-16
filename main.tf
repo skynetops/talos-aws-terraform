@@ -14,7 +14,7 @@ resource "null_resource" "prechecks" {
 }
 
 module "networking" {
-  source                      = "./cloud_infra/networking"
+  source                      = "github.com/francesco2323/talos-aws-networking?ref=main"
   project_name                = var.project_name
   region                      = var.region
   kubernetes_api_allowed_cidr = var.kubernetes_api_allowed_cidr
