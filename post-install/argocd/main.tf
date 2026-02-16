@@ -81,21 +81,21 @@ resource "helm_release" "argocd" {
       configs = {
         cm = {
           url = "https://a7b567d9c6311466b8b1af98f67cb612-1663751650.ap-southeast-1.elb.amazonaws.com"
-          "oidc.config" = <<-EOT
-            name: GitHub
-            issuer: https://github.com
-            clientID: ${var.oauth_client_id}
-            clientSecret: $oidc.clientSecret
-            requestedScopes:
-            - openid
-            - profile
-            - email
-            redirectURI: https://a7b567d9c6311466b8b1af98f67cb612-1663751650.ap-southeast-1.elb.amazonaws.com/api/dex/callback
+          "dex.config" = <<-EOT
+            connectors:
+            - type: github
+              id: github
+              name: GitHub
+              config:
+                clientID: ${var.oauth_client_id}
+                clientSecret: $github.clientSecret
+                orgs:
+                - name: skynetops
           EOT
         }
         secret = {
           argocdServerAdminPassword = var.admin_password_hash
-          "oidc.clientSecret"       = var.oauth_client_secret
+          "github.clientSecret"     = var.oauth_client_secret
         }
         params = {
           "server.insecure" = "false"
