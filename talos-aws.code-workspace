@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "../projects-documentation-template"
+		},
+		{
+			"name": "bitwarden-project-abschluss",
+			"path": "../bitwarden-project-abschluss"
+		},
+		{
+			"name": "Cloud-SOPs",
+			"path": "../Cloud-SOPs"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../terraform-aws-oidc-kms"
+		},
+		{
+			"path": "../cicd-worflows"
+		},
+		{
+			"path": "../terraform-aws-talos-modules"
+		}
+	],
+	"settings": {}
+}

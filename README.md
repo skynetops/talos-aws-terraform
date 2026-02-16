@@ -177,6 +177,83 @@ Notes:
 - You can add annotations via Helm/Terraform later; a domain is NOT mandatory before installing ArgoCD.
 - If you prefer ALB + HTTP(S) termination and path routing, install the AWS Load Balancer Controller and use Ingress; this repo currently uses a Service of type LoadBalancer (NLB/TCP).
 
+### Secure TLS with cert-manager (DNS-01 via Route53)
+
+For a trusted certificate on `argocd.skynetdevops.com` without AWS ACM:
+1. Ensure `argocd.skynetdevops.com` exists in Route53 and points to the Argo CD LoadBalancer (CNAME -> ELB hostname).
+2. Install cert-manager:
+   ```bash
+   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.crds.yaml
+   helm repo add jetstack https://charts.jetstack.io
+   helm repo update
+   helm install cert-manager jetstack/cert-manager -n cert-manager --create-namespace --version v1.14.4
+   ```
+3. Create an AWS credentials secret (do NOT commit keys). Replace values accordingly:
+   ```bash
+   kubectl -n cert-manager create secret generic route53-credentials \
+     --from-literal=aws_access_key_id=AKIA... \
+     --from-literal=aws_secret_access_key=XXXXXXXX
+   ```
+4. Create a ClusterIssuer (DNS-01 for Route53). Replace `HOSTED_ZONE_ID`, `EMAIL`:
+   ```yaml
+   apiVersion: cert-manager.io/v1
+   kind: ClusterIssuer
+   metadata:
+     name: letsencrypt-prod
+   spec:
+     acme:
+       email: EMAIL
+       server: https://acme-v02.api.letsencrypt.org/directory
+       privateKeySecretRef:
+         name: letsencrypt-prod
+       solvers:
+       - dns01:
+           route53:
+             hostedZoneID: HOSTED_ZONE_ID
+             region: ap-southeast-1
+             accessKeyIDSecretRef:
+               name: route53-credentials
+               key: aws_access_key_id
+             secretAccessKeySecretRef:
+               name: route53-credentials
+               key: aws_secret_access_key
+   ```
+   Apply it: `kubectl apply -f clusterissuer.yaml`
+5. Request the cert in `argocd` namespace:
+   ```yaml
+   apiVersion: cert-manager.io/v1
+   kind: Certificate
+   metadata:
+     name: argocd-server-tls
+     namespace: argocd
+   spec:
+     secretName: argocd-server-tls
+     issuerRef:
+       name: letsencrypt-prod
+       kind: ClusterIssuer
+     dnsNames:
+       - argocd.skynetdevops.com
+   ```
+   Apply it: `kubectl apply -f certificate.yaml`
+6. Configure Argo CD server to use the cert (Helm values override):
+   - Mount the secret and set extraArgs:
+     ```yaml
+     server:
+       extraArgs:
+         - --tls-cert=/etc/argocd/tls/tls.crt
+         - --tls-key=/etc/argocd/tls/tls.key
+       volumes:
+         - name: tls
+           secret:
+             secretName: argocd-server-tls
+       volumeMounts:
+         - name: tls
+           mountPath: /etc/argocd/tls
+           readOnly: true
+     ```
+   Re-run `terraform apply` to update Helm release.
+7. Verify: visit `https://argocd.skynetdevops.com` with no browser warnings.
+
 ---
 
 ## 🛠️ Troubleshooting & Maintenance
