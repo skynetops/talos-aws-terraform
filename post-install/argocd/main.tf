@@ -98,7 +98,7 @@ resource "helm_release" "argocd" {
           "github.clientSecret"     = var.oauth_client_secret
         }
         params = {
-          "server.insecure" = "false"
+          "server.insecure" = "true"
         }
       }
     })
