@@ -39,4 +39,4 @@ talosconfig
 worker.yaml
 control-plane.yaml
 
-.DS_Store
+.DS_Storesecrets.auto.tfvars
