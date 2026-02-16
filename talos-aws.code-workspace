@@ -22,6 +22,10 @@
 		},
 		{
 			"path": "../terraform-aws-talos-modules"
+		},
+		{
+			"name": "talos-k8s-manifests",
+			"path": "../talos-k8s-manifests"
 		}
 	],
 	"settings": {}
