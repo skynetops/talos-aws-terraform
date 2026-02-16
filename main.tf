@@ -95,8 +95,10 @@ module "post_install" {
   region       = var.region
 
   cilium_version   = var.cilium_version
-  argocd_version   = var.argocd_version
-  k8s_service_host = module.networking.load_balancer_dns
+  argocd_version           = var.argocd_version
+  k8s_service_host         = module.networking.load_balancer_dns
+  argocd_oidc_client_id    = var.argocd_oidc_client_id
+  argocd_oidc_client_secret = var.argocd_oidc_client_secret
 
   enables = var.post_install
 }
